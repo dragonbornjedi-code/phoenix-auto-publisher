@@ -107,6 +107,7 @@ const config = {
     channelId: process.env.DISCORD_CHANNEL_ID,
   },
   makeWebhook: process.env.MAKE_WEBHOOK_URL,
+  n8nWebhook: process.env.N8N_WEBHOOK_URL || 'http://100.71.190.76:5678/webhook/phoenix-publisher',
   gumroadStore: 'https://joshuarowland.gumroad.com',
   storeName: 'Phoenix Forge Digital Empire',
 };
@@ -591,26 +592,47 @@ async function postToDiscord(embedData, imageUrl = null) {
 }
 
 // ============================================================================
-// MAKE.COM WEBHOOK INTEGRATION
+// WEBHOOK INTEGRATIONS (n8n + Make.com)
 // ============================================================================
-async function notifyMakeWebhook(event, data) {
-  if (!config.makeWebhook) return;
+async function notifyWebhooks(event, data) {
+  const payload = {
+    event,
+    timestamp: new Date().toISOString(),
+    source: 'phoenix-auto-publisher',
+    ...data,
+  };
 
-  try {
-    await fetch(config.makeWebhook, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        event,
-        timestamp: new Date().toISOString(),
-        ...data,
-      }),
-    });
-    console.log('[Make.com] Webhook notified:', event);
-  } catch (error) {
-    console.error('[Make.com] Webhook error:', error.message);
+  // Notify n8n (self-hosted, primary)
+  if (config.n8nWebhook) {
+    try {
+      await fetch(config.n8nWebhook, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      console.log('[n8n] Webhook notified:', event);
+    } catch (error) {
+      console.log('[n8n] Webhook unreachable (server may be off):', error.message);
+    }
+  }
+
+  // Notify Make.com (backup/cloud)
+  if (config.makeWebhook) {
+    try {
+      await fetch(config.makeWebhook, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      console.log('[Make.com] Webhook notified:', event);
+    } catch (error) {
+      console.error('[Make.com] Webhook error:', error.message);
+    }
   }
 }
+
+// Alias for backwards compatibility
+const notifyMakeWebhook = notifyWebhooks;
 
 // ============================================================================
 // SMART MULTI-PLATFORM POSTING
