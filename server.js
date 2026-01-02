@@ -35,8 +35,9 @@ const config = {
     accessToken: process.env.PINTEREST_ACCESS_TOKEN,
   },
 
-  // Your products/content
+  // Your Gumroad store
   gumroadStore: 'https://joshuarowland.gumroad.com',
+  storeName: 'Phoenix Forge Digital Empire',
 
   // Perchance generators for content variety
   generators: {
@@ -46,28 +47,69 @@ const config = {
 };
 
 // ============================================================================
-// PRODUCTS DATABASE - Your Digital Empire products
+// PRODUCTS DATABASE - Phoenix Forge Digital Empire
 // ============================================================================
 const products = [
   {
     id: 1,
-    name: "Quest Category System",
-    description: "Complete gamification system for child learning",
-    url: "https://joshuarowland.gumroad.com/l/quest-system",
-    image: "https://your-image-url.com/quest.png",
-    hashtags: ["#gamification", "#learning", "#parenting", "#education"],
-    category: "education"
+    name: "Christmas Planner 2025 - Phoenix Edition",
+    description: "85-page complete holiday system. Gift trackers, budget tools, daily schedules, recipe collection, and gratitude journal. Transform Christmas chaos into organized magic!",
+    url: "https://joshuarowland.gumroad.com/l/christmas-planner-2025-phoenix",
+    image: "https://public-files.gumroad.com/variants/christmas-planner-cover.png",
+    hashtags: ["#ChristmasPlanner", "#HolidayPlanning", "#PhoenixEdition", "#BudgetPlanner", "#GiftTracker"],
+    category: "planners",
+    price: "$24.99"
   },
   {
     id: 2,
-    name: "Home Automation Templates",
-    description: "Smart home automation blueprints for Home Assistant",
-    url: "https://joshuarowland.gumroad.com/l/ha-templates",
-    image: "https://your-image-url.com/ha.png",
-    hashtags: ["#smarthome", "#homeassistant", "#automation", "#iot"],
-    category: "tech"
+    name: "Budget Mastery Course - Christmas Edition",
+    description: "Stop holiday overspending! 7-page workbook with budget planning, daily spending tracker, receipt organization, and credit card payoff calculator.",
+    url: "https://joshuarowland.gumroad.com/l/christmas-budget-mastery",
+    image: "https://public-files.gumroad.com/variants/budget-mastery-cover.png",
+    hashtags: ["#ChristmasBudget", "#BudgetPlanner", "#MoneyManagement", "#DebtFreeChristmas", "#FinancialPlanning"],
+    category: "finance",
+    price: "$15.00"
   },
-  // Add more products here...
+  {
+    id: 3,
+    name: "Phoenix Gratitude & Resilience Journal",
+    description: "10-page resilience workbook. Navigate holiday stress with gratitude, mindfulness practices, and emotional strength exercises. Rise stronger!",
+    url: "https://joshuarowland.gumroad.com/l/phoenix-gratitude-journal",
+    image: "https://public-files.gumroad.com/variants/gratitude-journal-cover.png",
+    hashtags: ["#GratitudeJournal", "#Resilience", "#MentalWellness", "#SelfCare", "#Mindfulness"],
+    category: "journals",
+    price: "$12.00"
+  },
+  {
+    id: 4,
+    name: "AR Dragon Starter Kit",
+    description: "Complete AR Dragon learning experience! Includes quest CSV, Replit code, LED scripts, and PDF guide. Build gamified learning for your child.",
+    url: "https://joshuarowland.gumroad.com/l/ar-dragon-kit",
+    image: "https://public-files.gumroad.com/variants/ar-dragon-cover.png",
+    hashtags: ["#ARDragon", "#EdTech", "#GamifiedLearning", "#KidsEducation", "#SmartHome"],
+    category: "tech",
+    price: "$9.00"
+  },
+  {
+    id: 5,
+    name: "Holiday Party Planning Kit",
+    description: "Complete party planning system! Guest lists, menu planning, decoration checklists, timelines, and shopping lists. Host stress-free celebrations!",
+    url: "https://joshuarowland.gumroad.com/l/holiday-party-kit",
+    image: "https://public-files.gumroad.com/variants/party-planning-cover.png",
+    hashtags: ["#PartyPlanning", "#HolidayParty", "#EventPlanning", "#Entertaining", "#HostessGift"],
+    category: "planners",
+    price: "$14.99"
+  },
+  {
+    id: 6,
+    name: "Christmas Recipe Collection",
+    description: "Holiday recipe organizer! Christmas cookies, main dishes, sides, beverages, appetizers with dietary accommodations. Document family favorites!",
+    url: "https://joshuarowland.gumroad.com/l/christmas-recipes",
+    image: "https://public-files.gumroad.com/variants/recipe-collection-cover.png",
+    hashtags: ["#ChristmasRecipes", "#HolidayCooking", "#RecipeOrganizer", "#ChristmasCookies", "#FamilyRecipes"],
+    category: "recipes",
+    price: "$9.99"
+  }
 ];
 
 // ============================================================================
