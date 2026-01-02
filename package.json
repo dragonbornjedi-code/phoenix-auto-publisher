@@ -1,0 +1,19 @@
+{
+  "name": "phoenix-forge-auto-publisher",
+  "version": "1.0.0",
+  "description": "Auto-publish Digital Empire products to social media",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "node-fetch": "^2.6.7",
+    "node-cron": "^3.0.2",
+    "twitter-api-v2": "^1.15.0",
+    "discord.js": "^14.13.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
