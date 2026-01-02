@@ -1,0 +1,71 @@
+name: Phoenix Auto Publisher - Scheduled Posts
+
+on:
+  schedule:
+    # Every 6 hours - 12am, 6am, 12pm, 6pm PST
+    - cron: '0 8,14,20,2 * * *'  # UTC times
+  workflow_dispatch:  # Manual trigger
+    inputs:
+      platform:
+        description: 'Platform to post to'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - twitter
+          - discord
+          - facebook
+          - instagram
+          - pinterest
+
+env:
+  REPLIT_APP_URL: ${{ secrets.REPLIT_APP_URL }}
+
+jobs:
+  trigger-post:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Scheduled Post
+        run: |
+          PLATFORM="${{ github.event.inputs.platform || 'all' }}"
+
+          if [ "$PLATFORM" = "all" ]; then
+            ENDPOINT="${REPLIT_APP_URL}/trigger"
+          else
+            ENDPOINT="${REPLIT_APP_URL}/trigger/${PLATFORM}"
+          fi
+
+          echo "Triggering post to: $PLATFORM"
+          echo "Endpoint: $ENDPOINT"
+
+          RESPONSE=$(curl -s -X POST "$ENDPOINT" \
+            -H "Content-Type: application/json" \
+            -w "\n%{http_code}")
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | head -n-1)
+
+          echo "Response Code: $HTTP_CODE"
+          echo "Response Body: $BODY"
+
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "Warning: Non-200 response, but continuing..."
+          fi
+
+      - name: Log Result
+        run: |
+          echo "Post triggered at $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+
+  health-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check App Health
+        run: |
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" "${REPLIT_APP_URL}/status" || echo "000")
+
+          if [ "$RESPONSE" = "200" ]; then
+            echo "App is healthy"
+          else
+            echo "Warning: App returned $RESPONSE"
+          fi

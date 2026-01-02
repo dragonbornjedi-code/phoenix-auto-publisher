@@ -1,0 +1,30 @@
+name: Phoenix Auto Publisher - Health Monitor
+
+on:
+  schedule:
+    # Every 30 minutes to keep app awake (backup to UptimeRobot)
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+env:
+  REPLIT_APP_URL: ${{ secrets.REPLIT_APP_URL }}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wake Up App
+        run: |
+          echo "Pinging app at $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          curl -s "${REPLIT_APP_URL}/" | head -c 200
+          echo ""
+          echo "Ping complete"
+
+  status-check:
+    runs-on: ubuntu-latest
+    needs: ping
+    steps:
+      - name: Check Platform Status
+        run: |
+          echo "Checking platform status..."
+          curl -s "${REPLIT_APP_URL}/status" | jq '.' || echo "Status check complete"
