@@ -1,0 +1,40 @@
+{
+  "name": "Phoenix - Simple Webhook Test",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "phoenix-test",
+        "responseMode": "lastNode",
+        "responseData": "allEntries"
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "id": "cbe6bb79-8582-4f84-8e68-4e0ded732cb6"
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {"name": "status", "value": "received"},
+            {"name": "timestamp", "value": "={{$now.toISO()}}"}
+          ]
+        }
+      },
+      "name": "Set Response",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [450, 300],
+      "id": "d3df427d-a79c-4f45-86a5-e4a98b722cb4"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{"node": "Set Response", "type": "main", "index": 0}]]
+    }
+  },
+  "active": true,
+  "settings": {}
+}

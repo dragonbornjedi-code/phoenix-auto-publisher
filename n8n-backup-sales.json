@@ -1,0 +1,416 @@
+{
+  "name": "Phoenix Sales Webhooks [PRODUCTION]",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "gumroad-sale",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "gumroad-webhook",
+      "name": "Gumroad Sale Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        100,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Process Gumroad sale\nconst input = $input.first().json;\nconst now = new Date();\n\ntry {\n  // Gumroad sends data in specific format\n  const amount = parseFloat(input.price) || parseFloat(input.sale_price) || 0;\n  const productName = input.product_name || input.product || input.short_product_id || 'Unknown Product';\n  const customerEmail = input.email || input.purchaser_email || '';\n  const orderId = input.sale_id || input.order_number || `GUM-${Date.now()}`;\n  \n  return {\n    json: {\n      success: true,\n      timestamp: now.toISOString(),\n      date: now.toISOString().split('T')[0],\n      platform: 'gumroad',\n      product: productName,\n      amount: amount / 100, // Gumroad sends cents\n      currency: input.currency || 'USD',\n      customer_email: customerEmail,\n      customer_name: input.full_name || input.purchaser_name || '',\n      order_id: orderId,\n      is_recurring: input.is_recurring_charge || false,\n      refunded: input.refunded || false,\n      celebration_message: `Cha-ching! $${(amount/100).toFixed(2)} Gumroad sale for ${productName}!`,\n      led_rgb: [0, 255, 0],\n      source: 'gumroad_webhook'\n    }\n  };\n} catch (error) {\n  return {\n    json: {\n      success: false,\n      error: error.message,\n      original: input,\n      source: 'gumroad_webhook'\n    }\n  };\n}"
+      },
+      "id": "process-gumroad",
+      "name": "Process Gumroad Sale",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        300,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "etsy-sale",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "etsy-webhook",
+      "name": "Etsy Sale Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        100,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Process Etsy sale\nconst input = $input.first().json;\nconst now = new Date();\n\ntry {\n  // Etsy webhook format\n  const amount = parseFloat(input.grandtotal?.amount) || parseFloat(input.subtotal?.amount) || parseFloat(input.total) || 0;\n  const productName = input.title || input.listing_title || input.transactions?.[0]?.title || 'Etsy Product';\n  const customerEmail = input.buyer_email || '';\n  const orderId = input.receipt_id || input.order_id || `ETSY-${Date.now()}`;\n  \n  return {\n    json: {\n      success: true,\n      timestamp: now.toISOString(),\n      date: now.toISOString().split('T')[0],\n      platform: 'etsy',\n      product: productName,\n      amount: amount,\n      currency: input.grandtotal?.currency_code || 'USD',\n      customer_email: customerEmail,\n      customer_name: input.buyer_name || input.name || '',\n      order_id: orderId,\n      quantity: input.quantity || input.transactions?.[0]?.quantity || 1,\n      celebration_message: `Etsy sale! $${amount.toFixed(2)} for ${productName}!`,\n      led_rgb: [255, 102, 0],\n      source: 'etsy_webhook'\n    }\n  };\n} catch (error) {\n  return {\n    json: {\n      success: false,\n      error: error.message,\n      original: input,\n      source: 'etsy_webhook'\n    }\n  };\n}"
+      },
+      "id": "process-etsy",
+      "name": "Process Etsy Sale",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        300,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "shopify-sale",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "shopify-webhook",
+      "name": "Shopify Sale Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        100,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Process Shopify sale\nconst input = $input.first().json;\nconst now = new Date();\n\ntry {\n  const amount = parseFloat(input.total_price) || parseFloat(input.subtotal_price) || 0;\n  const lineItems = input.line_items || [];\n  const productName = lineItems.length > 0 ? lineItems[0].title : 'Shopify Product';\n  \n  return {\n    json: {\n      success: true,\n      timestamp: now.toISOString(),\n      date: now.toISOString().split('T')[0],\n      platform: 'shopify',\n      product: productName,\n      amount: amount,\n      currency: input.currency || 'USD',\n      customer_email: input.email || input.customer?.email || '',\n      customer_name: input.customer?.first_name ? `${input.customer.first_name} ${input.customer.last_name || ''}` : '',\n      order_id: input.order_number || input.id || `SHOP-${Date.now()}`,\n      line_items_count: lineItems.length,\n      celebration_message: `Shopify sale! $${amount.toFixed(2)} for ${productName}!`,\n      led_rgb: [150, 200, 100],\n      source: 'shopify_webhook'\n    }\n  };\n} catch (error) {\n  return {\n    json: {\n      success: false,\n      error: error.message,\n      original: input,\n      source: 'shopify_webhook'\n    }\n  };\n}"
+      },
+      "id": "process-shopify",
+      "name": "Process Shopify Sale",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        300,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.success }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ]
+        }
+      },
+      "id": "sale-success-check",
+      "name": "Sale Valid?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        500,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1yaWYcadyfY3Yquanh9cYG2gR42sp77U3puXPzQ6CPIw",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Sales_Log",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $json.timestamp }}",
+            "Platform": "={{ $json.platform }}",
+            "Product": "={{ $json.product }}",
+            "Amount": "={{ $json.amount }}",
+            "Currency": "={{ $json.currency }}",
+            "Customer_Email": "={{ $json.customer_email }}",
+            "Customer_Name": "={{ $json.customer_name }}",
+            "Order_ID": "={{ $json.order_id }}",
+            "Source": "={{ $json.source }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "log-sale-sheets",
+      "name": "Log Sale -> Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        700,
+        400
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://192.168.12.207:8123/api/webhook/phoenix_sale",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "sale-ha-webhook",
+      "name": "Sale -> Home Assistant",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        700,
+        500
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://192.168.12.207:8123/api/services/notify/mobile_app_joshua_phone",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"title\": \"New Sale!\",\n  \"message\": \"{{ $json.celebration_message }}\",\n  \"data\": {\n    \"tag\": \"sale-{{ $json.platform }}\",\n    \"group\": \"digital-empire\",\n    \"importance\": \"high\"\n  }\n}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "notify-sale",
+      "name": "Notify Sale",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        700,
+        600
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Update daily sales total\nconst sale = $json;\nconst now = new Date();\n\nreturn {\n  json: {\n    ...sale,\n    daily_update: true,\n    update_type: 'sale_added',\n    hour: now.getHours(),\n    day_of_week: now.toLocaleDateString('en-US', {weekday: 'long'})\n  }\n};"
+      },
+      "id": "enrich-sale",
+      "name": "Enrich Sale Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        900,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: true, order_id: $json.order_id, platform: $json.platform, message: 'Sale logged successfully' }) }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "respond-success",
+      "name": "Respond: Success",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1100,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: false, error: $json.error || 'Processing failed' }) }}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "id": "respond-error",
+      "name": "Respond: Error",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        700,
+        700
+      ]
+    }
+  ],
+  "connections": {
+    "Gumroad Sale Webhook": {
+      "main": [
+        [
+          {
+            "node": "Process Gumroad Sale",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Gumroad Sale": {
+      "main": [
+        [
+          {
+            "node": "Sale Valid?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Etsy Sale Webhook": {
+      "main": [
+        [
+          {
+            "node": "Process Etsy Sale",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Etsy Sale": {
+      "main": [
+        [
+          {
+            "node": "Sale Valid?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Shopify Sale Webhook": {
+      "main": [
+        [
+          {
+            "node": "Process Shopify Sale",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Shopify Sale": {
+      "main": [
+        [
+          {
+            "node": "Sale Valid?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sale Valid?": {
+      "main": [
+        [
+          {
+            "node": "Log Sale -> Sheets",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Sale -> Home Assistant",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Notify Sale",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond: Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Sale -> Sheets": {
+      "main": [
+        [
+          {
+            "node": "Enrich Sale Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sale -> Home Assistant": {
+      "main": [
+        [
+          {
+            "node": "Enrich Sale Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Sale": {
+      "main": [
+        [
+          {
+            "node": "Enrich Sale Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enrich Sale Data": {
+      "main": [
+        [
+          {
+            "node": "Respond: Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "name": "phoenix"
+    },
+    {
+      "name": "production"
+    },
+    {
+      "name": "sales"
+    },
+    {
+      "name": "digital-empire"
+    }
+  ],
+  "active": false,
+  "versionId": "9ba18c4f-7a95-47ce-a25f-130e71920fec",
+  "id": "e33d1f50",
+  "meta": {
+    "instanceId": "phoenix-forge"
+  },
+  "updatedAt": "2025-12-17T12:00:00.000Z",
+  "createdAt": "2025-12-17T12:00:00.000Z"
+}
